@@ -15,7 +15,7 @@ from misc.utils import *
 import scipy.io as sio
 from PIL import Image, ImageOps
 
-torch.cuda.set_device(0)
+# torch.cuda.set_device(0)
 torch.backends.cudnn.benchmark = True
 
 mean_std = ([0.446139603853, 0.409515678883, 0.395083993673], [0.288205742836, 0.278144598007, 0.283502370119])
@@ -30,10 +30,10 @@ restore = standard_transforms.Compose([
 pil_to_tensor = standard_transforms.ToTensor()
 LOG_PARA = 100.0
 
-dataRoot = '../ProcessedData/Data.2019.11/NWPU/1204_min_576x768_mod16_2048'
+dataRoot = '../ProcessedData/shanghaitech_part_A/test_data'
 
 #model_path = 'exp/12-06_15-03_NWPU_Res101_SFCN_1e-05/latest_state.pth'
-model_path = 'exp/12-06_15-03_NWPU_Res101_SFCN_1e-05/all_ep_321_mae_90.7_mse_487.2_nae_0.375.pth'
+model_path = 'SCAR-latest.pth'
 
 def main():
 
@@ -46,11 +46,11 @@ def main():
 
 def test(file_list, model_path):
 
-    net = CrowdCounter(cfg.GPU_ID, 'Res101_SFCN')
-    net.cuda()
+    net = CrowdCounter(cfg.GPU_ID, 'SCAR')
+    # net
     #lastest_state = torch.load(model_path)
     #net.load_state_dict(lastest_state['net'])
-    net.load_state_dict(torch.load(model_path))
+    net.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
     net.eval()
 
     gts = []
@@ -66,7 +66,7 @@ def test(file_list, model_path):
             img = img.convert('RGB')
         img = img_transform(img)[None, :, :, :]
         with torch.no_grad():
-            img = Variable(img).cuda()
+            img = Variable(img)
             crop_imgs, crop_masks = [], []
             b, c, h, w = img.shape
             rh, rw = 576, 768
@@ -75,7 +75,7 @@ def test(file_list, model_path):
                 for j in range(0, w, rw):
                     gjs, gje = max(min(w-rw, j), 0), min(w, j+rw)
                     crop_imgs.append(img[:, :, gis:gie, gjs:gje])
-                    mask = torch.zeros(b, 1, h, w).cuda()
+                    mask = torch.zeros(b, 1, h, w)
                     mask[:, :, gis:gie, gjs:gje].fill_(1.0)
                     crop_masks.append(mask)
             crop_imgs, crop_masks = map(lambda x: torch.cat(x, dim=0), (crop_imgs, crop_masks))
@@ -91,7 +91,7 @@ def test(file_list, model_path):
 
             # splice them to the original size
             idx = 0
-            pred_map = torch.zeros(b, 1, h, w).cuda()
+            pred_map = torch.zeros(b, 1, h, w)
             for i in range(0, h, rh):
                 gis, gie = max(min(h-rh, i), 0), min(h, i+rh)
                 for j in range(0, w, rw):
