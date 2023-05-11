@@ -118,4 +118,4 @@ def test(img, model_path):
 
 if __name__ == '__main__':
     demo = gr.Interface(fn=main, inputs="image", outputs="text")
-    demo.launch(share = True)
+    demo.launch(share = False)

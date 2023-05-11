@@ -1,5 +1,11 @@
 # NWPU-Crowd Sample Code
 
+## Reproduce the demo
+* `pip install -r requirements.txt`
+* `python my_test.py`
+* visit http://127.0.0.1:7860/
+* upload image and wait (Might take a bit longer 500 seconds).
+
 ---
 
 This repo is the official implementation of [paper](https://arxiv.org/abs/2001.03360): **NWPU-Crowd: A Large-Scale Benchmark for Crowd Counting**. The code is developed based on [C^3 Framework](https://github.com/gjy3035/C-3-Framework). 
